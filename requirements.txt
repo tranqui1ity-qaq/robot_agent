@@ -1,0 +1,5 @@
+opencv-python==4.8.1.78
+panda-gym==3.8.2
+gymnasium[classic_control]==0.29.1
+numpy==1.24.3
+openai==1.3.3
