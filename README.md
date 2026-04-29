@@ -473,12 +473,16 @@ export LLM_MODEL="openai/gpt-4"  # 如果有 OpenAI key
 
 ---
 
-## 📖 更多资源
+## 📖 补充文档
 
-- **[完整项目指南](PROJECT_GUIDE.md)** — 深入讲解架构和实现细节
-- **[快速参考](QUICK_REFERENCE.md)** — 命令和快捷方式
-- **[OpenRouter 模型列表](OPENROUTER_MODELS.md)** — 支持的 LLM 模型详情
-- **[GitHub 仓库](https://github.com/tranqui1ity-qaq/robot_agent)** — 源代码和讨论
+详细文档请查看 **[docs/](docs/)** 目录：
+
+- **[快速参考](docs/QUICK_REFERENCE.md)** — ⚡ 命令速查和故障排查
+- **[项目指南](docs/PROJECT_GUIDE.md)** — 🏗️ 完整架构和实现讲解
+- **[架构总结](docs/REFACTOR_SUMMARY.md)** — 🔧 重构过程和演进历史
+- **[模型参考](docs/OPENROUTER_MODELS.md)** — 🤖 LLM 模型对比和选择
+
+👉 **[📚 文档导航中心](docs/README.md)** — 所有补充文档的索引
 
 ---
 
