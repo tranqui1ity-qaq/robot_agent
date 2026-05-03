@@ -8,6 +8,11 @@
 
 **一个完全由大语言模型 (LLM) 驱动的机械臂自主控制系统**。使用 OpenRouter API 调用多种 LLM 模型（Gemini、Claude、Mistral 等），让大模型通过闭环感知-决策-执行循环来完成 Pick & Place（夹取与放置）任务。
 
+
+https://github.com/user-attachments/assets/6dd391fa-851d-4569-b777-d265cc61fa24
+
+
+
 ### ✨ 核心特性
 
 - **🧠 LLM 驱动决策** — 大语言模型实时推理和决策，无需预编程的固定策略
