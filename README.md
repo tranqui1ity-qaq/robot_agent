@@ -25,15 +25,7 @@
 - **🔧 完整工具链** — 诊断工具、自动化脚本、详细文档
 - **📊 实时可视化** — PyBullet 仿真环境实时渲染机械臂运动
 
-### 🎯 应用场景
 
-- 🏭 工业自动化控制研究
-- 🤖 机器人学习研究
-- 🎓 AI 教学示例项目
-- 📚 LLM 工具调用 (Function Calling) 演示
-- ⚙️ 大模型控制系统原型验证
-
----
 
 ## 🚀 快速开始
 
@@ -87,7 +79,7 @@ export OPENROUTER_API_KEY="sk_your_api_key_here"
 # Windows: 设置环境变量（系统设置 → 高级 → 环境变量）
 ```
 
-**如何获取 API Key？**
+**获取 API Key**
 1. 访问 [OpenRouter Dashboard](https://openrouter.ai/keys)
 2. 点击 "Create Key"
 3. 复制生成的 key
@@ -163,7 +155,7 @@ bash record_video.sh quick.mp4 30 10 openrouter 30
 bash record_video.sh demo.mp4 50 20 openai 60
 ```
 
-📖 詳細说明：[📚 视频录制指南](docs/VIDEO_RECORDING_GUIDE.md)
+📖 说明：[📚 视频录制指南](docs/VIDEO_RECORDING_GUIDE.md)
 
 ---
 
@@ -278,12 +270,4 @@ ls -lh videos/
 
 📚 详见：[⚡ 快速参考](docs/QUICK_REFERENCE.md)
 
----
 
-<div align="center">
-
-**⭐ 如果本项目对你有帮助，请给个 Star！**
-
-Made with ❤️ by [tranqui1ity](https://github.com/tranqui1ity-qaq)
-
-</div>
