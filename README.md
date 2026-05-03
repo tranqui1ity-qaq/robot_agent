@@ -222,20 +222,6 @@ openai==1.3.3
 ---
 
 
-
-运行环境：MacBook Pro M1, 8GB RAM
-
-| 指标 | 值 |
-|------|-----|
-| 初始化时间 | 2-3 秒 |
-| 单步推理时间 | 2-5 秒（取决于 LLM） |
-| 完整任务耗时 | 20-60 秒（取决于步数和模型） |
-| 成功率（Gemini 3） | 95%+ |
-| 成功率（Claude 3.5） | 98%+ |
-| 平均 API 成本 | $0.01-0.05/任务 |
-
----
-
 ## 📖 完整文档
 
 所有详细文档都在 **[docs/](docs/)** 目录中，按功能和场景组织：
@@ -252,37 +238,6 @@ openai==1.3.3
 - **⚡ [快速参考](docs/QUICK_REFERENCE.md)** — 命令速查表
 
 👉 **[📚 文档导航中心](docs/README.md)** — 所有文档的索引和使用指南
-
-
-
-### 开发环境设置
-
-```bash
-git clone https://github.com/tranqui1ity-qaq/robot_agent.git
-cd robot_agent
-python -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
-
-# 进行修改...
-
-git add .
-git commit -m "描述你的改进"
-git push origin main
-```
-
-
-
-如果你在研究或项目中使用了本项目，请引用：
-
-```bibtex
-@software{robot_agent_2026,
-  author = {tranqui1ity},
-  title = {Panda Pick & Place - LLM-driven Robot Arm Control},
-  year = {2026},
-  url = {https://github.com/tranqui1ity-qaq/robot_agent}
-}
-```
 
 ---
 
