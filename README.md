@@ -5,6 +5,7 @@
 ![Status](https://img.shields.io/badge/Status-Active-success)
 
 ## 📋 项目介绍
+![功能演示动画](./videos/robot_demo.gif)
 
 **一个完全由大语言模型 (LLM) 驱动的机械臂自主控制系统**。使用 OpenRouter API 调用多种 LLM 模型（Gemini、Claude、Mistral 等），让大模型通过闭环感知-决策-执行循环来完成 Pick & Place（夹取与放置）任务。
 
