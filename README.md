@@ -14,7 +14,8 @@
 - **🔄 完整闭环系统** — 感知 → 决策 → 执行 → 反馈 → 循环
 - **🛡️ 工作空间保护** — 自动验证坐标范围，防止机械臂碰撞
 - **💡 智能自我纠正** — LLM 根据反馈自动调整策略
-- **🔌 多模型支持** — 一行命令切换不同的 LLM 模型
+- **🔌 多模型支持** — 一行命令切换不同的 LLM 模型（OpenRouter + OpenAI）
+- **🎥 视频录制** — 一键录制机械臂操作过程为高质量 MP4 视频
 - **🔧 完整工具链** — 诊断工具、自动化脚本、详细文档
 - **📊 实时可视化** — PyBullet 仿真环境实时渲染机械臂运动
 
@@ -88,16 +89,23 @@ export OPENROUTER_API_KEY="sk_your_api_key_here"
 #### 步骤 5️⃣  - 运行项目
 
 ```bash
-# 使用默认模型（Google Gemini 3 Flash）运行 50 步
+# 方式 A：LLM 模式（推荐）- 使用默认模型运行 50 步
 ./run_openrouter.sh 50
 
-# 或使用 Python 直接运行
+# 方式 B：LLM 模式 - 直接使用 Python
 python main.py --mode llm --max-steps 50 --provider openrouter
+
+# 方式 C：演示模式 - 无需 API Key（硬编码策略）
+python main.py --mode demo --max-steps 50
+
+# 方式 D：录制视频 - 将运行过程保存为 MP4
+bash record_video.sh robot_demo.mp4 50 20 openrouter 60
 ```
 
 ✅ **完成！** 你应该看到 PyBullet 窗口显示机械臂运动。
 
----
+
+
 
 ## 📖 详细部署教程
 
@@ -336,20 +344,26 @@ export LLM_MODEL="deepseek/deepseek-chat"
 python main.py --mode llm --max-steps 50
 ```
 
-### 示例 4：诊断可用模型
+### 示例 4：录制演示视频 🎥 **[NEW]**
 
 ```bash
-python diagnose_openrouter.py
+# 基础版 - 使用默认参数（50步，20帧/步，60 FPS）
+bash record_video.sh
+
+# 自定义输出文件名
+bash record_video.sh my_demo.mp4
+
+# 高质量视频（更多帧，更流畅）
+bash record_video.sh high_quality.mp4 50 50 openrouter 60
+
+# 快速演示（较少帧，较小文件）
+bash record_video.sh quick.mp4 30 10 openrouter 30
+
+# 使用 OpenAI API 录制
+bash record_video.sh demo.mp4 50 20 openai 60
 ```
 
-输出示例：
-```
-✅ 可用模型：
-  - google/gemini-3-flash-preview  $0.05/1M tokens
-  - anthropic/claude-3.5-sonnet     $3.00/1M tokens
-  - mistralai/mistral-large         $2.70/1M tokens
-  ...
-```
+📖 詳細说明：[📚 视频录制指南](docs/VIDEO_RECORDING_GUIDE.md)
 
 ---
 
@@ -357,16 +371,36 @@ python diagnose_openrouter.py
 
 ```
 robot_agent/
-├── env_wrapper.py              # ⚙️ 低层机械臂控制（环境包装）
-├── skills.py                   # 🛠️ LLM 可调用的工具函数
-├── main.py                     # 🧠 主循环与 LLM 集成
-├── diagnose_openrouter.py      # 🔍 模型诊断工具
-├── run_openrouter.sh           # 🚀 自动化启动脚本
-├── README.md                   # 📖 本文件
-├── PROJECT_GUIDE.md            # 📚 完整项目指南
-├── QUICK_REFERENCE.md          # ⚡ 快速参考卡片
-├── GITHUB_PUSH_GUIDE.md        # 📤 GitHub 推送指南
-└── requirements.txt            # 📦 Python 依赖
+├── 📄 核心文件
+│   ├── env_wrapper.py              ⚙️ 低层机械臂控制（环境包装）
+│   ├── skills.py                   🛠️ LLM 可调用的工具函数
+│   └── main.py                     🧠 主循环与 LLM 集成
+│
+├── 🎬 视频录制
+│   ├── record_video.py             录制演示视频脚本
+│   └── record_video.sh             一键录制启动脚本 [NEW]
+│
+├── 🚀 启动脚本
+│   └── run_openrouter.sh           自动化启动脚本
+│
+├── 📚 文档 (全部在 docs/ 目录)
+│   ├── docs/README.md              📚 文档导航中心 [全新]
+│   ├── docs/QUICK_START.md         ⚡ 快速开始指南
+│   ├── docs/INSTALLATION.md        📥 详细安装步骤
+│   ├── docs/VIDEO_RECORDING_GUIDE.md  🎥 视频录制使用说明 [NEW]
+│   ├── docs/LLM_INTEGRATION.md     🤖 LLM 集成指南
+│   ├── docs/ARCHITECTURE.md        🔧 系统架构设计
+│   ├── docs/PROJECT_GUIDE.md       📖 完整项目讲解
+│   ├── docs/TROUBLESHOOTING.md     🐛 故障排查指南
+│   └── docs/QUICK_REFERENCE.md     ⚡ 快速参考卡片
+│
+├── 📦 配置文件
+│   ├── requirements.txt            Python 依赖
+│   ├── LICENSE                     MIT 许可证
+│   └── .gitignore                  Git 忽略规则
+│
+└── 📹 输出目录（自动创建）
+    └── videos/                     录制的 MP4 视频
 ```
 
 ---
@@ -393,72 +427,7 @@ openai==1.3.3
 
 ---
 
-## 🐛 故障排查
 
-### 问题 1：`ModuleNotFoundError: No module named 'panda_gym'`
-
-**原因**: 依赖未安装
-
-**解决**:
-```bash
-pip install panda-gym
-# 或重新安装所有依赖
-pip install -r requirements.txt
-```
-
----
-
-### 问题 2：`404 Not Found` 或 LLM 模型不可用
-
-**原因**: 模型在 OpenRouter 上不可用或 API Key 无效
-
-**解决**:
-```bash
-# 1. 验证 API Key
-echo $OPENROUTER_API_KEY  # 应显示你的 key
-
-# 2. 诊断可用模型
-python diagnose_openrouter.py
-
-# 3. 选择可用的模型
-export LLM_MODEL="mistralai/mistral-large"
-python main.py --mode llm --max-steps 50
-```
-
----
-
-### 问题 3：PyBullet 显示和渲染错误
-
-**原因**: 可能是图形库缺失或无显示屏
-
-**解决（Linux）**:
-```bash
-sudo apt-get install libgl1-mesa-glx libglib2.0-0
-# 或禁用渲染
-python main.py --mode demo --render false
-```
-
----
-
-### 问题 4：`Connection refused` 或 API 超时
-
-**原因**: 网络连接问题或 API 服务故障
-
-**解决**:
-```bash
-# 1. 检查网络
-ping openrouter.ai
-
-# 2. 使用其他 API 提供商或模型
-export LLM_MODEL="openai/gpt-4"  # 如果有 OpenAI key
-
-# 3. 增加超时时间
-# 编辑 main.py 中的 timeout 参数
-```
-
----
-
-## 📊 性能指标
 
 运行环境：MacBook Pro M1, 8GB RAM
 
@@ -473,22 +442,24 @@ export LLM_MODEL="openai/gpt-4"  # 如果有 OpenAI key
 
 ---
 
-## 📖 补充文档
+## 📖 完整文档
 
-详细文档请查看 **[docs/](docs/)** 目录：
+所有详细文档都在 **[docs/](docs/)** 目录中，按功能和场景组织：
 
-- **[快速参考](docs/QUICK_REFERENCE.md)** — ⚡ 命令速查和故障排查
-- **[项目指南](docs/PROJECT_GUIDE.md)** — 🏗️ 完整架构和实现讲解
-- **[架构总结](docs/REFACTOR_SUMMARY.md)** — 🔧 重构过程和演进历史
-- **[模型参考](docs/OPENROUTER_MODELS.md)** — 🤖 LLM 模型对比和选择
+### 🎯 快速导航
 
-👉 **[📚 文档导航中心](docs/README.md)** — 所有补充文档的索引
+- **🚀 [快速开始](docs/QUICK_START.md)** — 5 分钟快速上手
+- **📥 [安装指南](docs/INSTALLATION.md)** — 详细安装步骤（支持 macOS/Linux/Windows/Docker）
+- **🎥 [视频录制指南](docs/VIDEO_RECORDING_GUIDE.md)** — 一键录制演示视频 🆕
+- **🤖 [LLM 集成指南](docs/LLM_INTEGRATION.md)** — OpenRouter 和 OpenAI 配置
+- **🔧 [架构设计](docs/ARCHITECTURE.md)** — 系统架构和模块设计
+- **📚 [项目讲解](docs/PROJECT_GUIDE.md)** — 完整功能和源代码讲解
+- **🐛 [故障排查](docs/TROUBLESHOOTING.md)** — 常见问题和解决方案
+- **⚡ [快速参考](docs/QUICK_REFERENCE.md)** — 命令速查表
 
----
+👉 **[📚 文档导航中心](docs/README.md)** — 所有文档的索引和使用指南
 
-## 🤝 贡献指南
 
-欢迎提交 Issue 和 Pull Request！
 
 ### 开发环境设置
 
@@ -506,22 +477,7 @@ git commit -m "描述你的改进"
 git push origin main
 ```
 
----
 
-## 📝 License
-
-MIT License - 详见 [LICENSE](LICENSE) 文件
-
----
-
-## 📞 联系方式
-
-- **GitHub Issues**: [提交问题](https://github.com/tranqui1ity-qaq/robot_agent/issues)
-- **Email**: robot.agent@example.com
-
----
-
-## 🎓 引用
 
 如果你在研究或项目中使用了本项目，请引用：
 
@@ -542,24 +498,30 @@ MIT License - 详见 [LICENSE](LICENSE) 文件
 # 查看所有命令选项
 python main.py --help
 
-# 演示模式（无需 API Key）
+# 演示模式（无需 API Key)
 python main.py --mode demo --max-steps 50
 
 # LLM 模式（需要 API Key）
 python main.py --mode llm --max-steps 50
 
-# 使用启动脚本
+# 使用启动脚本（推荐）
 ./run_openrouter.sh 50
 
-# 诊断模型
-python diagnose_openrouter.py
+# 录制视频（新功能）
+bash record_video.sh                                    # 默认参数
+bash record_video.sh demo.mp4 50 20 openrouter 60      # 自定义参数
 
 # 后台运行
 nohup python main.py --mode llm --max-steps 100 > robot.log 2>&1 &
 
 # 查看并跟踪日志
 tail -f robot.log
+
+# 查看所有已录制的视频
+ls -lh videos/
 ```
+
+📚 详见：[⚡ 快速参考](docs/QUICK_REFERENCE.md)
 
 ---
 

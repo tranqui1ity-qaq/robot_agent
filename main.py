@@ -371,7 +371,7 @@ def main() -> None:
             base_url = "https://openrouter.ai/api/v1"
             # Using models verified to work in your region
             # Default: mistralai/mistral-large | Alternative: deepseek/deepseek-chat
-            model = os.environ.get("LLM_MODEL", "mistralai/mistral-large")
+            model = os.environ.get("LLM_MODEL", "deepseek/deepseek-v4-flash")
             print(f"Using OpenRouter API with model: {model}")
 
         else:  # openai
@@ -395,15 +395,24 @@ def main() -> None:
 
         system_prompt = (
             "You are a robotic manipulation planner for a Franka Panda arm in a Pick & Place task.\n"
-            "The scene contains a green cube (object) and an invisible green target (goal).\n"
-            "You have 4 tools: perceive_environment, move_arm_to(x,y,z), grasp, release.\n"
-            "Strategy:\n"
-            "1. Perceive to know object and target positions.\n"
-            "2. Open gripper (release), move above object, descend, grasp.\n"
-            "3. Lift, move above target, descend, release.\n"
-            "Coordinates are in metres. Workspace: x∈[-1.0,0.2], y∈[-0.6,0.6], z∈[0.0,1.2].\n"
-            "Keep the gripper at least 3 cm above the object before descending to grasp.\n"
-            "After dropping the cube, reply 'done' and stop calling tools."
+            "The scene contains a green cube (object) and an invisible target (goal).\n"
+            "You have 4 tools: perceive_environment(), move_arm_to(x,y,z), grasp(), release().\n"
+            "Coordinates are in metres. Workspace: x∈[-1.0, 0.2], y∈[-0.6, 0.6], z∈[0.0, 1.2].\n"
+            "\n"
+            "CRITICAL GRASPING RULES:\n"
+            "The object_position returned by the environment is the geometric center of the cube. "
+            "If you try to grasp at this exact Z-coordinate, the object will slip. "
+            "To grasp securely, your final descent Z-coordinate MUST be exactly (object_z - 0.015).\n"
+            "\n"
+            "Strategy (Strict SOP):\n"
+            "1. Perceive: Call perceive_environment() to get object and target coordinates.\n"
+            "2. Prepare: Call release() to ensure the gripper is open.\n"
+            "3. Hover: move_arm_to(object_x, object_y, object_z + 0.10) to safely position above the cube.\n"
+            "4. Descend: move_arm_to(object_x, object_y, object_z - 0.015) to wedge fingers against the cube.\n"
+            "5. Grasp: Call grasp().\n"
+            "6. Lift & Move: move_arm_to(target_x, target_y, target_z + 0.10) to move safely above the goal.\n"
+            "7. Place: move_arm_to(target_x, target_y, target_z) and call release().\n"
+            "8. Finish: Reply exactly with 'done' and stop calling tools."
         )
 
         messages: List[Dict[str, str]] = [

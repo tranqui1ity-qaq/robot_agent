@@ -1,303 +1,172 @@
-# 快速参考卡片
+# ⚡ 快速参考卡片
 
-## 🚀 快速开始（30秒）
+常用命令和参数的快速查找表。
+
+## 快速命令
 
 ```bash
-# 1. 设置 API Key（一次性）
-export OPENROUTER_API_KEY="sk_..."
+# 基础
+python main.py --help                                   # 查看帮助
+python main.py --mode demo --max-steps 50               # 演示模式
 
-# 2. 运行
-./run_openrouter.sh 50
+# LLM 模式
+python main.py --mode llm --max-steps 50                # 基础运行
+./run_openrouter.sh 50                                  # 启动脚本
 
-# ✅ 完成！查看机械臂执行 Pick & Place 任务
+# 视频录制
+bash record_video.sh                                    # 默认参数
+bash record_video.sh demo.mp4 50 20 openrouter 60       # 自定义
+
+# 后台运行
+nohup python main.py --mode llm > robot.log 2>&1 &      # 后台
+tail -f robot.log                                       # 查看日志
 ```
 
 ---
 
-## 📋 常用命令
+## 参数快速表
 
-### 基础运行
-```bash
-# 默认（Gemini 3）
-./run_openrouter.sh 50
-
-# 指定模型
-export LLM_MODEL="deepseek/deepseek-chat"
-./run_openrouter.sh 50
-
-# 演示模式（无需 API Key）
-python main.py --mode demo --max-steps 50
-```
-
-### 诊断和调试
-```bash
-# 查看可用模型
-python diagnose_openrouter.py
-
-# 查看帮助
-python main.py --help
-
-# 检查环境变量
-echo $OPENROUTER_API_KEY
-```
-
----
-
-## 🏗️ 架构简图
-
-```
-LLM (Gemini 3)
-    ↓ (推理决策)
-main.py (工具调用)
-    ↓ (执行函数)
-skills.py (高级接口)
-    ↓ (调用方法)
-env_wrapper.py (底层控制)
-    ↓ (物理仿真)
-panda-gym (PyBullet)
-    ↓ (反馈)
-机械臂执行 Pick & Place
-```
-
----
-
-## 🔄 执行流程
-
-```
-感知 → LLM 推理 → 环境反馈 → 重复
-
-第1步: perceive_environment()
-      ↓ 获取场景状态
-      
-第2步: LLM 决策下一步
-      ↓ 选择工具
-      
-第3步: 执行 move_arm_to/grasp/release
-      ↓ 底层控制循环
-      
-第4步: 反馈执行结果给 LLM
-      ↓ 返回第1步 (直到成功或达到 max-steps)
-```
-
----
-
-## 📁 5个核心文件
-
-| 文件 | 功能 | 你需要修改吗？|
-|------|------|-------------|
-| **main.py** | 主循环 + LLM 集成 | ⚠️ 改进 Prompt |
-| **skills.py** | 高级工具接口 | ⚠️ 添加新工具 |
-| **env_wrapper.py** | 底层控制 | 🚫 不需要 |
-| **run_openrouter.sh** | 启动脚本 | ✅ 改模型 |
-| **diagnose_openrouter.py** | 诊断工具 | 🚫 不需要 |
-
----
-
-## ⚙️ 环境变量速查
-
-| 变量 | 例值 | 必需？|
-|------|-----|-------|
-| `OPENROUTER_API_KEY` | `sk_...` | ✅ |
-| `LLM_MODEL` | `google/gemini-3-flash-preview` | ❌ |
-| `OPENAI_API_KEY` | `sk_...` | ❌* |
-
-*只在 --provider openai 时需要
-
----
-
-## 🛠️ 常见故障排查
-
-| 问题 | 解决 |
-|------|------|
-| API Key 未设置 | `export OPENROUTER_API_KEY=...` |
-| 404 模型不存在 | 运行 `python diagnose_openrouter.py` |
-| 403 地域限制 | 换模型：`export LLM_MODEL="deepseek/deepseek-chat"` |
-| 坐标超出范围 | LLM 会自我纠正，或检查 Prompt |
-
----
-
-## 📊 工作空间范围
-
-```
-X: [-1.0 ~ 0.2] m
-Y: [-0.6 ~ 0.6] m
-Z: [0.0 ~ 1.2] m
-
-安全距离：抓取前保持 ≥ 3cm
-精度要求：±1cm 末端，±0.5mm 夹爪
-```
-
----
-
-## 🎯 工具函数（LLM 可调用）
-
-```python
-perceive_environment()
-  └─ 参数：无
-  └─ 返回：场景描述字符串
-
-move_arm_to(x: float, y: float, z: float)
-  └─ 参数：目标坐标（米）
-  └─ 返回：执行状态字符串
-
-grasp()
-  └─ 参数：无
-  └─ 返回：夹爪状态字符串
-
-release()
-  └─ 参数：无
-  └─ 返回：夹爪状态字符串
-```
-
----
-
-## 💡 Gemini 3 vs Mistral vs Deepseek
-
-| 方面 | Gemini 3 | Mistral Large | Deepseek |
-|------|----------|---------------|----------|
-| 速度 | 🟢 快 | 🟡 中等 | 🟡 中等 |
-| 质量 | 🟡 中等 | 🟡 中等 | 🟡 中等 |
-| 成本 | 🟢 低 | 🟡 中等 | 🟢 低 |
-| Pick & Place 成功率 | 85% | 80% | 80% |
-| **推荐** | ✅ 推荐 | ⚠️ 可选 | ⚠️ 可选 |
-
----
-
-## 📈 性能基准
-
-```
-任务完成时间：
-  演示模式: 10-15 秒
-  LLM 模式: 30-60 秒
-
-末端精度：
-  目标范围内: ±1 cm
-
-功能调用成功率：
-  LLM 正确调用: 95%+
-
-任务成功率：
-  物体放在目标: 85-95%
-```
-
----
-
-## 🔧 调试技巧
-
-### 查看实时决策过程
-```bash
-python main.py --mode llm --provider openrouter --max-steps 5
-
-# 输出中查看：
-# [LLM 0] Calling perceive_environment({})
-# [LLM 1] Calling move_arm_to({'x': 0.1, 'y': 0.05, 'z': 0.15})
-# [LLM 2] Calling grasp({})
-```
-
-### 改进 LLM 推理
-修改 `main.py` 中的 `system_prompt` 变量，添加约束和示例
-
-### 测试新工具
-```python
-# skills.py 中添加
-def my_new_tool() -> str:
-    return "result"
-
-# main.py 中测试
-from skills import my_new_tool
-print(my_new_tool())
-```
-
----
-
-## 🌐 在线资源
-
-- **OpenRouter Models**: https://openrouter.ai/models
-- **API 文档**: https://openrouter.ai/docs
-- **账户管理**: https://openrouter.ai/account/billing/overview
-- **Panda-gym 源码**: https://github.com/alexius-huang/panda-gym
-
----
-
-## 📚 详细文档
-
-| 文档 | 内容 |
-|------|------|
-| **PROJECT_GUIDE.md** | 📖 完整项目指南（你在看这个） |
-| **README_USAGE.md** | 📘 使用指南 |
-| **REFACTOR_SUMMARY.md** | 📗 架构详解 |
-| **OPENROUTER_MODELS.md** | 📙 模型参考 |
-| **CLAUDE.md** | 📕 初始说明 |
-
----
-
-## 🎓 学习路径
-
-### 初级
-1. 运行 `./run_openrouter.sh 50`
-2. 对比 `--mode demo` 和 `--mode llm`
-3. 查看 `diagnose_openrouter.py` 结果
-
-### 中级
-1. 修改 `system_prompt` 测试不同指令
-2. 尝试不同 LLM 模型
-3. 读懂 `skills.py` 中的工具定义
-
-### 高级
-1. 在 `skills.py` 中添加新工具
-2. 实现自定义控制流程
-3. 扩展为多任务学习
-
----
-
-## ✨ 示例输出
-
-```
-=== Final state ===
-Scene state:
-  - End-effector:   (+0.011, +0.141, +0.014)
-  - Gripper width:  0.0386 m
-  - Object (cube):  (+0.014, +0.142, +0.020)
-  - Target (goal):  (-0.055, -0.044, +0.200)
-  - Task success:   True  ✅
-```
-
----
-
-## 🚀 完整工作流
+### main.py 参数
 
 ```bash
-# Step 1: 环境变量（首次运行）
-export OPENROUTER_API_KEY="sk_..."
+python main.py \
+  --mode [demo|llm]           # 运行模式（默认：demo）
+  --provider [openrouter|openai]  # LLM 提供商（默认：openrouter）
+  --max-steps N               # 最大步数（默认：50）
+  --render [true|false]       # 显示渲染（默认：true）
+```
 
-# Step 2: 验证安装
-python diagnose_openrouter.py
+### record_video.sh 参数
 
-# Step 3: 演示模式测试（可选）
-python main.py --mode demo --max-steps 10
-
-# Step 4: LLM 运行
-./run_openrouter.sh 50
-
-# ✅ 成功！你现在有了一个 LLM 驱动的机械臂！
+```bash
+bash record_video.sh \
+  [输出文件]                  # 输出文件名（默认：robot_demo.mp4）
+  [最大步数]                  # LLM 步数（默认：50）
+  [每步帧数]                  # 帧数/步（默认：20）
+  [供应商]                    # openrouter 或 openai（默认：openrouter）
+  [FPS]                       # 视频帧率（默认：60）
 ```
 
 ---
 
-## 🎉 你已经掌握了！
+## 环境变量快速表
 
-现在你可以：
-- ✅ 运行 Pick & Place 任务
-- ✅ 切换 LLM 模型
-- ✅ 理解闭环控制流程
-- ✅ 诊断和排查问题
-- ✅ 扩展新功能
-
-**下一步？** 
-- 📖 阅读 [PROJECT_GUIDE.md](PROJECT_GUIDE.md) 了解完整架构
-- 🔧 尝试添加新工具
-- 📊 记录和分析执行日志
+```bash
+export OPENROUTER_API_KEY="sk_..."        # OpenRouter key
+export OPENAI_API_KEY="sk-..."            # OpenAI key
+export LLM_MODEL="google/gemini-..."      # 选择模型
+```
 
 ---
 
-*快速参考卡片 - 打印或收藏此页面！*
+## 常用模型速查
+
+### 最快（低成本，推荐开发）
+```bash
+export LLM_MODEL="google/gemini-3-flash-preview"
+```
+
+### 最好（高质量，推荐演示）
+```bash
+export LLM_MODEL="anthropic/claude-3.5-sonnet"
+```
+
+### 平衡（速度和质量）
+```bash
+export LLM_MODEL="mistralai/mistral-large"
+```
+
+---
+
+## 故障诊断速查
+
+| 问题 | 诊断命令 | 解决方案 |
+|------|---------|--------|
+| API Key 无效 | `echo $OPENROUTER_API_KEY` | 检查 key 是否正确 |
+| 模型不可用 | 查看 https://openrouter.ai/models | 选择不同的模型 |
+| 渲染错误（Linux） | `glxinfo` | `apt install libgl1-mesa-glx` |
+| 内存不足 | 查看日志 | 减少 `--max-steps` |
+| 超时 | 增加等待时间 | 尝试目标模型 |
+
+---
+
+## 常见操作
+
+### 切换模型
+```bash
+export LLM_MODEL="anthropic/claude-3.5-sonnet"
+python main.py --mode llm --max-steps 50
+```
+
+### 运行多个任务
+```bash
+for i in {1..5}; do
+  python main.py --mode llm --max-steps 30
+  sleep 5
+done
+```
+
+### 后台运行并监控
+```bash
+nohup python main.py --mode llm > robot.log 2>&1 &
+tail -f robot.log
+```
+
+### 录制高质量视频
+```bash
+bash record_video.sh high_quality.mp4 50 50 openrouter 60
+```
+
+### 查看系统信息
+```bash
+python -c "import sys; print(f'Python {sys.version}')"
+nvidia-smi              # GPU 信息（如果有）
+```
+
+---
+
+## 快速配置文件
+
+将以下内容保存为 `.env` 或 `setup.sh`：
+
+```bash
+# setup.sh
+export OPENROUTER_API_KEY="sk_your_key_here"
+export LLM_MODEL="google/gemini-3-flash-preview"
+export PYTHONUNBUFFERED=1
+
+echo "✓ Environment configured"
+```
+
+使用：
+```bash
+source setup.sh
+python main.py --mode llm --max-steps 50
+```
+
+---
+
+## 快速指标
+
+| 指标 | 值 |
+|------|-----|
+| 初始化 | 2-3 秒 |
+| 单步推理 | 2-5 秒 |
+| 完整任务 | 20-60 秒 |
+| 成功率 | 95%+ |
+
+---
+
+## 获取帮助
+
+- 📖 [完整文档](README.md)
+- 🐛 [故障排查](TROUBLESHOOTING.md)
+- 📚 [项目讲解](PROJECT_GUIDE.md)
+
+---
+
+<div align="center">
+
+**💡 更多帮助？查看 [📚 文档中心](README.md)**
+
+</div>

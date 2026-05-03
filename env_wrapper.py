@@ -45,6 +45,8 @@ class RobotArmController:
         self.gripper_steps = 30
         self.gripper_open_target = 0.08
         self.gripper_closed_target = 0.00
+        
+        self.is_gripper_closed = False  # <--- 新增：记录当前夹爪状态
 
     def _is_in_workspace(self, pos: np.ndarray) -> bool:
         b = self.workspace_bounds
@@ -87,7 +89,7 @@ class RobotArmController:
             # panda-gym: ee_displacement = action[:3] * 0.05
             action = np.zeros(4, dtype=np.float32)
             action[:3] = np.clip(delta / 0.05, -1.0, 1.0)
-            action[3] = 0.0  # do not change gripper while moving
+            action[3] = -1.0 if self.is_gripper_closed else 1.0  # do not change gripper while moving
             self.obs, _, terminated, _, self.info = self.env.step(action)
             if terminated:
                 break
@@ -149,6 +151,7 @@ class RobotArmController:
 
         final_width = float(robot.get_fingers_width())
         state = "opened" if open_gripper else "closed"
+        self.is_gripper_closed = not open_gripper # <--- 新增：记录状态
         return f"Gripper {state} (width={final_width:.4f} m)."
 
     def get_observation(self) -> Dict[str, Union[list, float, bool]]:

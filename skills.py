@@ -91,19 +91,45 @@ def move_arm_to(x: float, y: float, z: float) -> str:
         return f"Error during motion: {exc}. Please try again with a different coordinate."
 
 
+# def grasp() -> str:
+#     """Close the gripper to grasp the object.
+
+#     The gripper is closed to a width slightly smaller than the object
+#     (≈4 cm) so that the fingers are wedged against the cube. The arm is
+#     locked during finger motion to avoid disturbing the object.
+
+#     Returns:
+#         A status string confirming the new gripper width.
+#     """
+#     controller = _ensure_initialized()
+#     try:
+#         return controller.control_gripper(open_gripper=False, target_width=0.03)
+#     except Exception as exc:  # pragma: no cover
+#         return f"Error closing gripper: {exc}. Please try again."
+    
+    
+    
 def grasp() -> str:
-    """Close the gripper to grasp the object.
-
-    The gripper is closed to a width slightly smaller than the object
-    (≈4 cm) so that the fingers are wedged against the cube. The arm is
-    locked during finger motion to avoid disturbing the object.
-
-    Returns:
-        A status string confirming the new gripper width.
-    """
+    """Close the gripper to grasp the object with automatic Z-axis descent."""
     controller = _ensure_initialized()
     try:
-        return controller.control_gripper(open_gripper=False, target_width=0.03)
+        # 1. 获取当前机械臂的真实坐标
+        current_ee_pos = controller._base_env.robot.get_ee_position()
+        
+        # 2. 强行让 Z 轴再往下压 2 厘米（贴近桌面，把方块完全套入夹爪）
+        # 这里的 0.02 你可以根据视频观察再微调，比如 0.025
+        target_z = current_ee_pos[2] - 0.02 
+        
+        # 3. 执行下探动作
+        controller.step_to_position(current_ee_pos[0], current_ee_pos[1], target_z)
+        
+        # 4. 下探到位后，执行闭合动作 (使用前面讨论的最强抓取力)
+        original_steps = controller.gripper_steps
+        controller.gripper_steps = 100 
+        result = controller.control_gripper(open_gripper=False, target_width=0.00)
+        controller.gripper_steps = original_steps
+        
+        return result
     except Exception as exc:  # pragma: no cover
         return f"Error closing gripper: {exc}. Please try again."
 
